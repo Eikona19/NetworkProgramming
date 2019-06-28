@@ -10,31 +10,12 @@ void DieWithError(char *errorMessage){
 	exit(1);//エラーの時は1以上を返す
 }
 void commun (int sock){
-	int not;
 	char buf[BUF_SIZE];
-	char response[BUF_SIZE];
 	int len_r; //受信文字数
-	while((len_r = recv(sock,buf,BUF_SIZE,0))>0){
+	if((len_r = recv(sock,buf,BUF_SIZE,0))<=0)DieWithError("recv()failed");//受信文字数を返す
 	buf[len_r]='\0'; //\0は文字列の終わりを示す
   	printf("%s\n",buf);
 	if(send(sock,buf,strlen(buf),0)!=strlen(buf))DieWithError("send()sent a message of unexpected bytes");//送信文字数を返す
-			if(strstr(buf, "\r\n\r\n")) { //ifは成り立つか成り立たないかなので!=NULlがなくてもよい
-				break;
-			}
-	}
-	if(len_r <= 0) DieWithError("received()filed.");	
-	printf("recievd HTTP request.\n");
-	if((len_r = recv(sock,buf,BUF_SIZE,0))<=0)
-	sprintf(response,"HTTP/1.1 200 Ok \r\n");
-	if(send(sock,buf,strlen(buf),0)!=strlen(response))DieWithError("send()sent a message of unexpected bytes");	
-	sprintf(response,"Content-Type:text/html;charset=utf-8\n\r\n\r");
-	if(send(sock,buf,strlen(buf),0)!=strlen(response))DieWithError("send()sent a message of unexpected bytes");
-	sprintf(response,"<IDOCTYPE html><html><head><title>\r\n");
-	if(send(sock,buf,strlen(buf),0)!=strlen(response))DieWithError("send()sent a message of unexpected bytes");
-	sprintf(response,"ネットワークプログラミングのwebサイト\r\n");
-	if(send(sock,buf,strlen(buf),0)!=strlen(response))DieWithError("send()sent a message of unexpected bytes");
-	sprintf(response,"</title></head><body>ネットワークダイスキ</body></html>");
-	if(send(sock,buf,strlen(buf),0)!=strlen(response))DieWithError("send()sent a message of unexpected bytes");
 }
 int main (int argc, char **argv){
 	int cliSock;	
