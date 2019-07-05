@@ -10,17 +10,19 @@ void DieWithError(char *errorMessage){
 	exit(1);//エラーの時は1以上を返す
 }
 void commun (int sock){
-	int not;
 	char buf[BUF_SIZE];
+	char buf_old[BUF_SIZE];
+	char buf2[2*BUF_SIZE];
 	char response[BUF_SIZE];
 	int len_r; //受信文字数
+	buf_old[0]='\0' ;
 	while((len_r = recv(sock,buf,BUF_SIZE,0))>0){
 	buf[len_r]='\0'; //\0は文字列の終わりを示す
-  	printf("%s\n",buf);
-	if(send(sock,buf,strlen(buf),0)!=strlen(buf))DieWithError("send()sent a message of unexpected bytes");//送信文字数を返す
-			if(strstr(buf, "\r\n\r\n")) { //ifは成り立つか成り立たないかなので!=NULlがなくてもよい
+  	sprintf(buf2,"%s%s", buf_old, buf);
+			if(strstr(buf2, "\r\n\r\n")) { //ifは成り立つか成り立たないかなので!=NULlがなくてもよい
 				break;
 			}
+		sprintf(buf_old,"%s",buf);
 	}
 	if(len_r <= 0) DieWithError("received()filed.");	
 	printf("recievd HTTP request.\n");
