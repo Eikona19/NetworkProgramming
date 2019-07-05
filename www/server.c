@@ -26,17 +26,29 @@ void commun (int sock){
 	}
 	if(len_r <= 0) DieWithError("received()filed.");	
 	printf("recievd HTTP request.\n");
-	if((len_r = recv(sock,buf,BUF_SIZE,0))<=0)
-	sprintf(response,"HTTP/1.1 200 Ok \r\n");
-	if(send(sock,buf,strlen(buf),0)!=strlen(response))DieWithError("send()sent a message of unexpected bytes");	
-	sprintf(response,"Content-Type:text/html;charset=utf-8\n\r\n\r");
-	if(send(sock,buf,strlen(buf),0)!=strlen(response))DieWithError("send()sent a message of unexpected bytes");
-	sprintf(response,"<IDOCTYPE html><html><head><title>\r\n");
-	if(send(sock,buf,strlen(buf),0)!=strlen(response))DieWithError("send()sent a message of unexpected bytes");
-	sprintf(response,"ネットワークプログラミングのwebサイト\r\n");
-	if(send(sock,buf,strlen(buf),0)!=strlen(response))DieWithError("send()sent a message of unexpected bytes");
-	sprintf(response,"</title></head><body>ネットワークダイスキ</body></html>");
-	if(send(sock,buf,strlen(buf),0)!=strlen(response))DieWithError("send()sent a message of unexpected bytes");
+	sprintf(response, "HTTP/1.1 200 OK\r\n");
+    if(send(sock, response, strlen(response), 0) != strlen(response))
+        DieWithError("send() sent a message of unexpected bytes");
+    
+    sprintf(response, "Content-Type: text/html; charset=utf-8\r\n");
+    if(send(sock, response, strlen(response), 0) != strlen(response))
+        DieWithError("send() sent a message of unexpected bytes");
+        
+    sprintf(response, "\r\n");
+    if(send(sock, response, strlen(response), 0) != strlen(response))
+        DieWithError("send() sent a message of unexpected bytes");
+    
+    sprintf(response, "<!DOCTYPE html><html><head><title>");
+    if(send(sock, response, strlen(response), 0) != strlen(response))
+        DieWithError("send() sent a message of unexpected bytes");
+    
+    sprintf(response, "ネットワークプログラミングのwebサイト");
+    if(send(sock, response, strlen(response), 0) != strlen(response))
+        DieWithError("send() sent a message of unexpected bytes");
+    
+    sprintf(response, "</title></head><body>ネットワークダイスキ</body></html>");
+    if(send(sock, response, strlen(response), 0) != strlen(response))
+        DieWithError("send() sent a message of unexpected bytes");
 }
 int main (int argc, char **argv){
 	int cliSock;	
