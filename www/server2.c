@@ -4,47 +4,25 @@
 #include<arpa/inet.h>
 #include<unistd.h>
 #include<string.h>
-#include<regex.h>
 #define BUF_SIZE 256
 void DieWithError(char *errorMessage){
 	perror(errorMessage);//標準エラー出力にエラーを返す
 	exit(1);//エラーの時は1以上を返す
 }
 void commun (int sock){
-	regex_t regBuf;
-	regmatch_t regMatch[1];
 	char buf[BUF_SIZE];
 	char buf_old[BUF_SIZE];
 	char buf2[2*BUF_SIZE];
 	char response[BUF_SIZE];
 	int len_r; //受信文字数
-	char result[100];
-	char *uri;
-	const char *pattern = "GET[^\n]+HTTP";
-	if(regcomp(&regBuf,pattern,REG_EXTENDED | REG_NEWLINE)!=0){
-		DieWithError("regcomp failed");
-	}
-	result[0]='\0';
 	buf_old[0]='\0' ;
 	while((len_r = recv(sock,buf,BUF_SIZE,0))>0){
-		if(regexec(&regBuf,buf2,1,regMatch,0)!=0){
-			int startIndex = regMatch[0].rm_so;
-			int endIndex = regMatch[0].rm_eo;
-			strncpy(result,buf2+startIndex,endIndex-startIndex); //cpy = copy
-		}
 	buf[len_r]='\0'; //\0は文字列の終わりを示す
   	sprintf(buf2,"%s%s", buf_old, buf);
 			if(strstr(buf2, "\r\n\r\n")) { //ifは成り立つか成り立たないかなので!=NULlがなくてもよい
 				break;
 			}
 		sprintf(buf_old,"%s",buf);
-	}
-	regfree(&regBuf);
-	if(result[0]!='\0'){
-		uri = strtok(uri," ");
-		uri = strtok(NULL," ");
-	}else{
-		DieWithError("No URI");
 	}
 	if(len_r <= 0) DieWithError("received()filed.");	
 	printf("recievd HTTP request.\n");
