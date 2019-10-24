@@ -1,84 +1,119 @@
-#include <stdio.h> 
-
-#include <string.h> 
-
+#include <stdio.h>
+#include <string.h>
 #include <sys/socket.h>
-
- #include <arpa/inet.h> 
-
-#include <stdlib.h> 
-
-#include <unistd.h> 
-
+#include <arpa/inet.h>
 #include <stdlib.h>
-
-#define BUF_SIZE 256 
-
+#include <unistd.h>
+#define BUF_SIZE 256
 #define MONEY_DIGIT_SIZE 10
 
-void DieWithError(char *); 
-
-int prepare_server_socket(int); 
-
+void DieWithError(char *);
+int prepare_server_socket(int);
 void commun(int);
+void read_until_delim(int, char *, char, int);
+int get_current_balance();
+void set_current_balance(int);
+int main(int argc, char *argv[])
+{
+    struct sockaddr_in clientAddress;
+    unsigned int szClientAddr;
+    int cliSock;
 
-int main(int argc, char *argv[]) {
+    int servSock = prepare_server_socket(10001);
 
-struct sockaddr_in clientAddress; unsigned int szclientAddr; int cliSock;
+    listen(servSock, 5);
 
-int servSock = prepare_server_socket(10001);
+    while (1)
+    {
 
-listen (servSock, 5);
+        szClientAddr = sizeof(clientAddress);
+        cliSock = accept(servSock, (struct sockaddr *)&clientAddress, &szClientAddr),
 
-while (1) {
+        commun(cliSock);
 
-szClientAddr = sizeof(clientAddress); cliSock = accept(servSock, (struct sockaddr *)&clientAddress, &szClientAddr),
+        close(cliSock);
+    }
 
-commun(cliSock);
+    close(servSock);
 
-close(cliSock);
-
+    return 0;
 }
 
-close (servSock); 
+void DieWithError(char *errorMessage)
+{
 
-return 0;
+    perror(errorMessage);
 
+    exit(1);
 }
 
+int prepare_server_socket(int port)
+{
 
+    int servSock = socket(PF_INET, SOCK_STREAM, 0);
 
+    if (servSock < 0)
+        DieWithError("socket() failed");
 
-void DieWithError(char *errorMessage) {
+    struct sockaddr_in servAddress;
 
-perror(errorMessage); 
+    servAddress.sin_family = AF_INET;
 
-exit(1);
+    servAddress.sin_addr.s_addr = htonl(INADDR_ANY);
 
-int prepare_server_socket(int port) {
+    servAddress.sin_port = htons(port);
 
-int servSock = socket(PF_INET, SOCK_STREAM, 0); 
+    bind(servSock, (struct sockaddr *)&servAddress, sizeof(servAddress));
 
-if (servSock < 0) DieWithError("socket() failed");
-
-struct sockaddr_in servAddress; 
-
-servAddress.sin_family = AF INET; 
-
-servAddress.sin_addr.s_addr = htonl(INADDR_ANY); 
-
-servAddress.sin_port = htons (port);
-
-
-
-bind (servSock, (struct sockaddr*)&servAddress, sizeof(servAddress));
-
-
-
-return servSock;
-
-
-
+    return servSock;
 }
 
+void read_until_delim(int sock, char *buf, char delimiter, int max_length)
+{
+    int len_r = 0;
+    int index_letter = 0;
+    while (index_letter < max_length - 1)
+    {
+        if ((len_r = recv(sock, buf + index_letter, 1, 0)) <= 0)
+        {
+            //エラー
+            printf("接続が切れました\n");
+            return;
+        }
+        if (buf[index_letter] == delimiter)
+        {
+            break;
+        }
+        else
+        {
+            index_letter++;
+        }
+    }
+    //nullを末尾に追加
+    buf[index_letter] = '\0';
+}
+void commun(int sock)
+{
+    char buf[BUF_SIZE];
+    int balance = get_current_balance();
 
+    read_until_delim(sock, buf, '_', BUF_SIZE);
+    balance += atoi(buf);
+    read_until_delim(sock, buf, '_', BUF_SIZE);
+    balance -= atoi(buf);
+
+    set_current_balance(balance);
+
+    sprintf(buf, "%d_", balance);
+    if (send(sock, buf, strlen(buf), 0) != strlen(buf))
+        DieWithError("send() sent a message of unexpected bytes");
+}
+
+int get_current_balance()
+{
+    return 1000000;
+}
+void set_current_balance(int new_balance)
+{
+    return;
+}
